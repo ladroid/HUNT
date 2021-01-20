@@ -1,4 +1,4 @@
-# Top Lop
+# The hunt has begun!
 
 An adventure game for the [Arduboy](https://arduboy.com/)
 
