@@ -1,6 +1,6 @@
 # Top Lop
 
-An adventure game for the [Arduboy] (https://arduboy.com/)
+An adventure game for the [Arduboy](https://arduboy.com/)
 
 ## How to play
 
@@ -12,8 +12,11 @@ This is a simple game where the idea is to avoid enemies in a time.
         move
 
 **Features**
+    
     * Random spawning enemies
+    
     * Sound effects (soon will be)
+    
     * Two types of map (soon will be)
 
 ## Installation
