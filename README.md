@@ -11,6 +11,9 @@ This is a simple game where the idea is to avoid enemies in a time.
     * arrows 
         move
 
+    * B Button
+        attack/shoot
+
 **Features**
     
     * Random spawning enemies
