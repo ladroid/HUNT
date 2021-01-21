@@ -1,11 +1,7 @@
 class Bullet {
 public:
-  float x = 0.0f;
-  float y = 0.0f;
-
-  float x_mod = 0.0f;
-  float y_mod = 0.0f;
-
-  uint8_t effect = 0;
-  uint8_t bsize = 0;
+  uint8_t bulletSize = 3; // Size of a square bullet
+  
+  uint8_t bulletWait = 6; // Minimum frames between firing
+  int bulletOff = -1;     // "Bullet not in use" value;
 };

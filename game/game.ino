@@ -4,7 +4,7 @@
 #include "Player.h"
 #include "LevelMap.h"
 #include "Menu.h"
-//#include "Bullet.h"
+#include "Bullet.h"
 
 Arduboy2 arduboy;
 
@@ -41,10 +41,8 @@ Rect playerRect { hero.x, hero.y, 16, 16 };
 List<Enemy, SPAWN_LIMIT> enemies;
 //List<Bullet, 8> bullets;
 
-constexpr uint8_t bulletSize = 3; // Size of a square bullet
 constexpr uint8_t bullets = 5;    // Maximum number of bullets
-constexpr uint8_t bulletWait = 6; // Minimum frames between firing
-constexpr int bulletOff = -1;     // "Bullet not in use" value;
+Bullet _bullet;
 
 Rect bullet[bullets];
 
@@ -245,7 +243,7 @@ void shoot(int x, int y) {
 uint8_t findUnusedBullet() {
   uint8_t bulletNum;
   for (bulletNum = 0; bulletNum < bullets; ++bulletNum) {
-    if (bullet[bulletNum].x == bulletOff) {
+    if (bullet[bulletNum].x == _bullet.bulletOff) {
       break; // unused bullet found
     }
   }
@@ -255,11 +253,11 @@ uint8_t findUnusedBullet() {
 // Move all the bullets and disable any that go off screen
 void moveBullets() {
   for (uint8_t bulletNum = 0; bulletNum < bullets; ++bulletNum) {
-    if (bullet[bulletNum].x != bulletOff) { // If bullet in use
+    if (bullet[bulletNum].x != _bullet.bulletOff) { // If bullet in use
       ++bullet[bulletNum].x; // move bullet right
     }
     if (bullet[bulletNum].x >= arduboy.width()) { // If off screen
-      bullet[bulletNum].x = bulletOff;  // Set bullet as unused
+      bullet[bulletNum].x = _bullet.bulletOff;  // Set bullet as unused
     }
   }
 }
@@ -267,9 +265,9 @@ void moveBullets() {
 // Draw all the active bullets
 void drawBullets() {
   for (uint8_t bulletNum = 0; bulletNum < bullets; ++bulletNum) {
-    if (bullet[bulletNum].x != bulletOff) { // If bullet in use
+    if (bullet[bulletNum].x != _bullet.bulletOff) { // If bullet in use
       //arduboy.drawCircle(bullet[bulletNum].x, bullet[bulletNum].y, 3, WHITE);
-      arduboy.fillRect(bullet[bulletNum].x, bullet[bulletNum].y, bulletSize, bulletSize);
+      arduboy.fillRect(bullet[bulletNum].x, bullet[bulletNum].y, _bullet.bulletSize, _bullet.bulletSize);
     }
   }
 }
@@ -399,9 +397,9 @@ void setup() {
   arduboy.setFrameRate(60);
 
   for (uint8_t bulletNum = 0; bulletNum < bullets; ++bulletNum) {
-    bullet[bulletNum].x = bulletOff;
-    bullet[bulletNum].width = bulletSize;
-    bullet[bulletNum].height = bulletSize;
+    bullet[bulletNum].x = _bullet.bulletOff;
+    bullet[bulletNum].width = _bullet.bulletSize;
+    bullet[bulletNum].height = _bullet.bulletSize;
   }
   
   arduboy.display();
