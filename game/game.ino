@@ -4,6 +4,7 @@
 #include "Player.h"
 #include "LevelMap.h"
 #include "Menu.h"
+//#include "Bullet.h"
 
 Arduboy2 arduboy;
 
@@ -21,9 +22,6 @@ Arduboy2 arduboy;
 
 #define SPAWN_LIMIT 2
 
-#define ENEMY_MIN_SPEED 5
-#define ENEMY_MAX_SPEED 4
-
 int mapx = 0;
 int mapy = 0;
 
@@ -36,9 +34,19 @@ int frame = 0;
 
 uint8_t queue = 0;
 
+uint8_t waitCount = 0;
+
 Rect playerRect { hero.x, hero.y, 16, 16 };
 
 List<Enemy, SPAWN_LIMIT> enemies;
+//List<Bullet, 8> bullets;
+
+constexpr uint8_t bulletSize = 3; // Size of a square bullet
+constexpr uint8_t bullets = 5;    // Maximum number of bullets
+constexpr uint8_t bulletWait = 6; // Minimum frames between firing
+constexpr int bulletOff = -1;     // "Bullet not in use" value;
+
+Rect bullet[bullets];
 
 void _update()
 {
@@ -204,6 +212,66 @@ void player_control() {
     }
     Sprites::drawOverwrite(playerRect.x, playerRect.y, heroRight, frame);
   }
+  if(arduboy.pressed(B_BUTTON)) {
+    shoot(hero.x, hero.y);
+  }
+}
+
+/*
+ * TODO: shoot
+ * TODO: draw bullet
+ */
+
+void shoot(int x, int y) {
+  if (waitCount == 0) {
+    uint8_t bulletNum = findUnusedBullet();
+    if (bulletNum != bullets) { // If we get an unused bullet
+      // Set the start position. (A positive X indicates bullet in use)
+      bullet[bulletNum].x = x;
+      bullet[bulletNum].y = y + 3; // Part way down the player
+      waitCount = 6; // Start the delay counter for the next bullet
+    }
+  }
+  moveBullets();
+  drawBullets();
+
+  // Decrement the bullet wait count if active
+  if (waitCount != 0) {
+    --waitCount;
+  }
+}
+
+//drawing bullet
+uint8_t findUnusedBullet() {
+  uint8_t bulletNum;
+  for (bulletNum = 0; bulletNum < bullets; ++bulletNum) {
+    if (bullet[bulletNum].x == bulletOff) {
+      break; // unused bullet found
+    }
+  }
+  return bulletNum;
+}
+
+// Move all the bullets and disable any that go off screen
+void moveBullets() {
+  for (uint8_t bulletNum = 0; bulletNum < bullets; ++bulletNum) {
+    if (bullet[bulletNum].x != bulletOff) { // If bullet in use
+      ++bullet[bulletNum].x; // move bullet right
+    }
+    if (bullet[bulletNum].x >= arduboy.width()) { // If off screen
+      bullet[bulletNum].x = bulletOff;  // Set bullet as unused
+    }
+  }
+}
+
+// Draw all the active bullets
+void drawBullets() {
+  for (uint8_t bulletNum = 0; bulletNum < bullets; ++bulletNum) {
+    if (bullet[bulletNum].x != bulletOff) { // If bullet in use
+      //arduboy.drawCircle(bullet[bulletNum].x, bullet[bulletNum].y, 3, WHITE);
+      arduboy.fillRect(bullet[bulletNum].x, bullet[bulletNum].y, bulletSize, bulletSize);
+    }
+  }
 }
 
 //random spawning enemy
@@ -221,8 +289,7 @@ void spawn_enemy(int count) {
     spawn_enemy.x = spawn_x;
     spawn_enemy.y = spawn_y;
 
-    //TODO: make enemies speed slow
-    spawn_enemy.enemy_speed = 6; /*random(ENEMY_MAX_SPEED - 1, ENEMY_MIN_SPEED + 1);*/
+    spawn_enemy.enemy_speed = 4; /*random(ENEMY_MAX_SPEED - 1, ENEMY_MIN_SPEED + 1);*/
 
     //add enemies into list
     enemies.add(spawn_enemy);
@@ -258,9 +325,9 @@ void enemy_chase() {
       }
     }
 
-//    if(arduboy.collide(playerRect, enemyRect)) {
-//      enemies.removeAt(i);
-//    }
+    if(arduboy.collide(playerRect, enemyRect)) {
+      restart_game();
+    }
     
     enemies[i] = enemy;
     Sprites::drawOverwrite(enemies[i].x, enemies[i].y, enemy_down, frame);
@@ -289,6 +356,16 @@ void check_enemy_queue() {
       }
     }
   }
+}
+
+void restart_game() {
+  enemies.clear_list();
+
+  hero.x = WIDTH / 2;
+  hero.y = HEIGHT / 2;
+  hero.wave = 1;
+  
+  generate_wave();
 }
 
 void count_timer(uint8_t start) {
@@ -320,6 +397,13 @@ void setup() {
 
   arduboy.begin();
   arduboy.setFrameRate(60);
+
+  for (uint8_t bulletNum = 0; bulletNum < bullets; ++bulletNum) {
+    bullet[bulletNum].x = bulletOff;
+    bullet[bulletNum].width = bulletSize;
+    bullet[bulletNum].height = bulletSize;
+  }
+  
   arduboy.display();
   generate_wave();
   arduboy.initRandomSeed();
