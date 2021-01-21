@@ -82,8 +82,8 @@ void draw()
 }
 
 void titlescreen() {
-  arduboy.setCursor(35, 30);
-  arduboy.print(F("TOP LOP!\n"));
+  arduboy.setCursor(7, 30);
+  arduboy.print(F("The hunt has begun!\n"));
   if (arduboy.justPressed(A_BUTTON)) {
     //gamestate = GAME_PLAY;
     gamestat = 1;
@@ -135,9 +135,6 @@ void drawMenu()
   // Draw menu
   arduboy.setCursor(menuPositionX, menuPositionY + (menuPadding * 0));
   arduboy.print(F("ONE PLAYER"));
-  
-  arduboy.setCursor(menuPositionX, menuPositionY + (menuPadding * 1));
-  arduboy.print(F("TWO PLAYER"));
   
   arduboy.setCursor(menuPositionX, menuPositionY + (menuPadding * 2));
   arduboy.print(F("OPTIONS"));
@@ -211,18 +208,22 @@ void player_control() {
     Sprites::drawOverwrite(playerRect.x, playerRect.y, heroRight, frame);
   }
   if(arduboy.pressed(B_BUTTON)) {
-    shoot(hero.x, hero.y);
+    
+    if(mapx < 16) {
+      shoot(hero.x, hero.y);
+      move_bullets(true);
+    }
+    else {
+      shoot(hero.x, hero.y);
+      move_bullets(false);
+    }
   }
 }
 
-/*
- * TODO: shoot
- * TODO: draw bullet
- */
-
+//shoot
 void shoot(int x, int y) {
   if (waitCount == 0) {
-    uint8_t bulletNum = findUnusedBullet();
+    uint8_t bulletNum = find_unused_bullet();
     if (bulletNum != bullets) { // If we get an unused bullet
       // Set the start position. (A positive X indicates bullet in use)
       bullet[bulletNum].x = x;
@@ -230,19 +231,18 @@ void shoot(int x, int y) {
       waitCount = 6; // Start the delay counter for the next bullet
     }
   }
-  moveBullets();
-  drawBullets();
+  draw_bullets();
 
   // Decrement the bullet wait count if active
   if (waitCount != 0) {
-    --waitCount;
+    waitCount--;
   }
 }
 
 //drawing bullet
-uint8_t findUnusedBullet() {
+uint8_t find_unused_bullet() {
   uint8_t bulletNum;
-  for (bulletNum = 0; bulletNum < bullets; ++bulletNum) {
+  for (bulletNum = 0; bulletNum < bullets; bulletNum++) {
     if (bullet[bulletNum].x == _bullet.bulletOff) {
       break; // unused bullet found
     }
@@ -251,10 +251,13 @@ uint8_t findUnusedBullet() {
 }
 
 // Move all the bullets and disable any that go off screen
-void moveBullets() {
-  for (uint8_t bulletNum = 0; bulletNum < bullets; ++bulletNum) {
-    if (bullet[bulletNum].x != _bullet.bulletOff) { // If bullet in use
-      ++bullet[bulletNum].x; // move bullet right
+void move_bullets(bool shoot_left) {
+  for (uint8_t bulletNum = 0; bulletNum < bullets; bulletNum++) {
+    if (bullet[bulletNum].x != _bullet.bulletOff && shoot_left == false) { // If bullet in use
+      bullet[bulletNum].x++; // move bullet right
+    }
+    if (bullet[bulletNum].x != _bullet.bulletOff && shoot_left == true) {
+      bullet[bulletNum].x--;
     }
     if (bullet[bulletNum].x >= arduboy.width()) { // If off screen
       bullet[bulletNum].x = _bullet.bulletOff;  // Set bullet as unused
@@ -263,11 +266,11 @@ void moveBullets() {
 }
 
 // Draw all the active bullets
-void drawBullets() {
-  for (uint8_t bulletNum = 0; bulletNum < bullets; ++bulletNum) {
+void draw_bullets() {
+  for (uint8_t bulletNum = 0; bulletNum < bullets; bulletNum++) {
     if (bullet[bulletNum].x != _bullet.bulletOff) { // If bullet in use
       //arduboy.drawCircle(bullet[bulletNum].x, bullet[bulletNum].y, 3, WHITE);
-      arduboy.fillRect(bullet[bulletNum].x, bullet[bulletNum].y, _bullet.bulletSize, _bullet.bulletSize);
+      arduboy.fillRect(bullet[bulletNum].x, bullet[bulletNum].y, _bullet.bulletSize, _bullet.bulletSize, BLACK);
     }
   }
 }
