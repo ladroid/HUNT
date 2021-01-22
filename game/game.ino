@@ -36,6 +36,8 @@ uint8_t queue = 0;
 
 uint8_t waitCount = 0;
 
+uint16_t hitCount = 0;
+
 Rect playerRect { hero.x, hero.y, 16, 16 };
 
 List<Enemy, SPAWN_LIMIT> enemies;
@@ -82,10 +84,12 @@ void draw()
 }
 
 void titlescreen() {
-  arduboy.setCursor(7, 30);
-  arduboy.print(F("The hunt has begun!\n"));
+  arduboy.setCursor(40, 30);
+  arduboy.setTextSize(2);
+  arduboy.print(F("HUNT!\n"));
   if (arduboy.justPressed(A_BUTTON)) {
     //gamestate = GAME_PLAY;
+    arduboy.setTextSize(1);
     gamestat = 1;
     changeGameState(GameMenu::Menu);
   }
@@ -136,7 +140,7 @@ void drawMenu()
   arduboy.setCursor(menuPositionX, menuPositionY + (menuPadding * 0));
   arduboy.print(F("ONE PLAYER"));
   
-  arduboy.setCursor(menuPositionX, menuPositionY + (menuPadding * 2));
+  arduboy.setCursor(menuPositionX, menuPositionY + (menuPadding * 1));
   arduboy.print(F("OPTIONS"));
 
   // Draw cursor
@@ -208,14 +212,15 @@ void player_control() {
     Sprites::drawOverwrite(playerRect.x, playerRect.y, heroRight, frame);
   }
   if(arduboy.pressed(B_BUTTON)) {
-    
     if(mapx < 16) {
       shoot(hero.x, hero.y);
       move_bullets(true);
+      check_collision_enemy();
     }
     else {
       shoot(hero.x, hero.y);
       move_bullets(false);
+      check_collision_enemy();
     }
   }
 }
@@ -265,6 +270,26 @@ void move_bullets(bool shoot_left) {
   }
 }
 
+//check collision
+void check_collision_enemy() {
+  Enemy enemy;
+  Rect enemyRect { enemy.x, enemy.y, 16, 18 };
+  for(uint8_t bulletNum = 0; bulletNum < bullets; bulletNum++) {
+    if(arduboy.collide(bullet[bulletNum], enemyRect)) {
+      hitCount++;
+      bullet[bulletNum].x = _bullet.bulletOff;
+      //TODO:remove bullet
+    }
+  }
+}
+
+//display hits
+void display_hits() {
+  arduboy.setCursor(80, 0);
+  arduboy.print(F("HITS: "));
+  arduboy.print(hitCount);
+}
+
 // Draw all the active bullets
 void draw_bullets() {
   for (uint8_t bulletNum = 0; bulletNum < bullets; bulletNum++) {
@@ -309,7 +334,7 @@ void enemy_chase() {
     enemy.y = enemies[i].y;
     enemy.enemy_speed = 4;
     
-    Rect enemyRect  { enemy.x, enemy.y, 16, 18 };
+    Rect enemyRect { enemy.x, enemy.y, 16, 18 };
     if(enemy.move_itter >= enemy.enemy_speed) {
       enemy.move_itter = 0;
       if(enemy.x < hero.x) {
@@ -388,6 +413,8 @@ void gameplay() {
   
   enemy_chase();
   check_enemy_queue();
+
+  display_hits();
 
   if (arduboy.justPressed(A_BUTTON)) {
     //gamestate = GAME_OVER;

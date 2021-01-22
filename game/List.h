@@ -56,12 +56,16 @@ public:
     return false;
   }
   
-  void removeAt(IndexType index) {
+  bool removeAt(IndexType index) {
+    if(index >= this->next) {
+      return false;
+    }
     this->next--;
     for(IndexType i = index; i < this->next; i++) {
       this->items[i] = this->items[i+1];
+      return true;
     }
-    this->items[this->next].~ItemType();
+    //this->items[this->next].~ItemType();
   }
   
   ItemType& operator [] (IndexType index) {

@@ -1,4 +1,4 @@
-# The hunt has begun!
+# HUNT!
 
 An adventure game for the [Arduboy](https://arduboy.com/)
 
