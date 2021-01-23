@@ -6,86 +6,58 @@
 #include <stddef.h>
 #include <stdint.h>
 
-template<typename T, size_t Size>
-class List
-{ 
-public:
-  using ItemType = T;
-  using IndexType = uint8_t;
-  static constexpr size_t _size = Size;
-  static constexpr IndexType firstIndex = 0;
-  static constexpr IndexType lastIndex = _size - 1;
+template<typename T, uint8_t N>
+struct List
+{
 private:
-  ItemType items[_size];
-  IndexType next;
-public:
-  List() : items { }, next { 0 }
-  {  }
+  T array[N];
+  uint8_t next;
+
+public: 
+  // Returns the number of Ts currently in the list
+  uint8_t get_size(void) const { return next; }
   
-  bool isFull() {
-    return (this->next == this->get_size());
-  }
+  // Returns the maximum number of Ts the list can hold
+  uint8_t getCapacity(void) const { return N; }
   
-  bool isEmpty() {
-    return (this->next == firstIndex);
-  }
+  // Returns true if the list is full
+  bool isFull(void) const { return get_size() == getCapacity(); }
   
-  bool add(const ItemType& item) {
-    if (this->isFull()) {
+  // Returns true if the list is empty
+  bool isEmpty(void) const { return get_size() == 0; }
+  
+  // Clears the list (by cheating)
+  void clear_list(void) { next = 0; }
+  
+  // Returns true if the T was added
+  // Returns false if the list is already full
+  bool add(const T & item)
+  {
+    if(this->isFull())
       return false;
-    }
-  
-    this->items[this->next] = item;
-    this->next++;
+    
+    array[next] = item; // put the T in the array
+    ++next; // increment the next index
     return true;
   }
   
-  bool _remove(ItemType& item) {
-    for (IndexType i = 0; i < this->next; i++) {
-      if (this->items[i] != item) {
-        continue;
-      }
-      this->next--;
-      while (i < this->next) {
-        this->items[i] = this->items[i++];
-        i++;
-      }
-      this->items[this->next].~ItemType();
-      return true;
-    }
-    return false;
-  }
-  
-  bool removeAt(IndexType index) {
-    if(index >= this->next) {
+  // Returns true if the T was removed
+  // Returns false if the index was invalid
+  bool removeAt(uint8_t index)
+  {
+    if(index >= next)
       return false;
-    }
-    this->next--;
-    for(IndexType i = index; i < this->next; i++) {
-      this->items[i] = this->items[i+1];
-      return true;
-    }
-    //this->items[this->next].~ItemType();
+    
+    --next; // decrement next index
+    for(int i = index; i < next; ++i) // shuffle everything down
+      array[i] = array[i + 1];
+    return true;
   }
   
-  ItemType& operator [] (IndexType index) {
-    return this->items[index];
-  }
-  
-  const ItemType& operator [] (IndexType index) const {
-    return this->items[index];
-  }
-  
-  IndexType get_size() const {
-    return static_cast<IndexType>(_size);
-  }
-  
-  void clear_list() {
-    for(IndexType i = 0; i < this->next; i++) {
-      this->items[i].~ItemType();
-    }
-    this->next = 0;
-  }
+  // These are for indexing the list
+  // Be careful, these don't check if the index is valid
+  T & operator[](uint8_t index) { return array[index]; }  
+  const T & operator[](uint8_t index) const { return array[index]; }
 };
 
 #endif

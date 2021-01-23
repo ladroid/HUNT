@@ -41,11 +41,11 @@ uint16_t hitCount = 0;
 Rect playerRect { hero.x, hero.y, 16, 16 };
 
 List<Enemy, SPAWN_LIMIT> enemies;
-//List<Bullet, 8> bullets;
 
 constexpr uint8_t bullets = 5;    // Maximum number of bullets
 Bullet _bullet;
 
+Enemy enem;
 Rect bullet[bullets];
 
 void _update()
@@ -272,16 +272,14 @@ void move_bullets(bool shoot_left) {
 
 //check collision
 void check_collision_enemy() {
-  bool dead = false;
   for(uint8_t i = 0; i < enemies.get_size(); i++) {
     Rect enemyRect { enemies[i].x, enemies[i].y, 16, 18 };
     for(uint8_t bulletNum = 0; bulletNum < bullets; bulletNum++) {
       if(arduboy.collide(bullet[bulletNum], enemyRect)) {
         hitCount++;
         bullet[bulletNum].x = _bullet.bulletOff;
-        //TODO:remove enemy
+        //remove enemy
         enemies.removeAt(i);
-        dead = true;
       }
     }
   }
@@ -298,7 +296,6 @@ void display_hits() {
 void draw_bullets() {
   for (uint8_t bulletNum = 0; bulletNum < bullets; bulletNum++) {
     if (bullet[bulletNum].x != _bullet.bulletOff) { // If bullet in use
-      //arduboy.drawCircle(bullet[bulletNum].x, bullet[bulletNum].y, 3, WHITE);
       arduboy.fillRect(bullet[bulletNum].x, bullet[bulletNum].y, _bullet.bulletSize, _bullet.bulletSize, BLACK);
     }
   }
@@ -307,7 +304,7 @@ void draw_bullets() {
 //random spawning enemy
 void spawn_enemy(int count) {
   for(int i = 0; i < count; i++) {
-    Enemy spawn_enemy;
+    //Enemy spawn_enemy;
     
     int spawn_x = hero.x;
     int spawn_y = hero.y;
@@ -315,14 +312,13 @@ void spawn_enemy(int count) {
     while((spawn_x > X_MIN) && (spawn_x < X_MAX) && (spawn_y > Y_MIN) && (spawn_y < Y_MAX)) {
         spawn_x = random(X_MIN - 100, X_MAX + 100); // 50
         spawn_y = random(Y_MIN - 50, Y_MAX + 50); // 35
-    }
-    spawn_enemy.x = spawn_x;
-    spawn_enemy.y = spawn_y;
+    } 
+    enem.x = spawn_x;
+    enem.y = spawn_y;
 
-    spawn_enemy.enemy_speed = 4; /*random(ENEMY_MAX_SPEED - 1, ENEMY_MIN_SPEED + 1);*/
-
+    enem.enemy_speed = 4;
     //add enemies into list
-    enemies.add(spawn_enemy);
+    enemies.add(enem);
   }
 }
 
@@ -332,34 +328,30 @@ void enemy_chase() {
   
   for(unsigned int i = 0; i < enemies.get_size(); i++)
   {
-    Enemy enemy;
-    enemy.move_itter = enemies[i].move_itter + 1;
-    enemy.x = enemies[i].x;
-    enemy.y = enemies[i].y;
-    enemy.enemy_speed = 4;
+    //Enemy enemy;
+    enem.move_itter = enemies[i].move_itter + 1;
+    enem.x = enemies[i].x;
+    enem.y = enemies[i].y;
+    enem.enemy_speed = 4;
     
     Rect enemyRect { enemies[i].x, enemies[i].y, 16, 18 };
-    if(enemy.move_itter >= enemy.enemy_speed) {
-      enemy.move_itter = 0;
-      if(enemy.x < hero.x) {
-        enemy.x++; 
+    if(enem.move_itter >= enem.enemy_speed) {
+      enem.move_itter = 0;
+      if(enem.x < hero.x) {
+        enem.x++; 
       }
-      if(enemy.x > hero.x) {
-        enemy.x--;
+      if(enem.x > hero.x) {
+        enem.x--;
       }
-      if(enemy.y < hero.y) {
-        enemy.y++;
+      if(enem.y < hero.y) {
+        enem.y++;
       }
-      if(enemy.y > hero.y) {
-        enemy.y--;
+      if(enem.y > hero.y) {
+        enem.y--;
       }
-    }
-
-    if(arduboy.collide(playerRect, enemyRect)) {
-      restart_game();
     }
     
-    enemies[i] = enemy;
+    enemies[i] = enem;
     Sprites::drawOverwrite(enemies[i].x, enemies[i].y, enemy_down, frame);
   }
 }
@@ -384,25 +376,6 @@ void check_enemy_queue() {
       if(enemies.get_size() >= SPAWN_LIMIT) {
         break;
       }
-    }
-  }
-}
-
-void restart_game() {
-  enemies.clear_list();
-
-  hero.x = WIDTH / 2;
-  hero.y = HEIGHT / 2;
-  hero.wave = 1;
-  
-  generate_wave();
-}
-
-void count_timer(uint8_t start) {
-  while(start > -1) {
-    if(start != 0) {
-      start--;
-      delay(100);
     }
   }
 }
