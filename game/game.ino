@@ -64,6 +64,9 @@ void _update()
     case GameMenu::Options:
       //updateOptions();
       break;
+    case GameMenu::HighScoreScreen:
+      highscorescreen();
+      break;
   }
 }
 
@@ -79,6 +82,9 @@ void draw()
       break;
     case GameMenu::Options:
       //drawOptions();
+      break;
+    case GameMenu::HighScoreScreen:
+      highscorescreen();
       break;
   }
 }
@@ -157,11 +163,15 @@ void gameoverscreen() {
 }
 
 void highscorescreen() {
-  arduboy.setCursor(0, 0);
-  arduboy.print("High Score Screen\n");
-  if (arduboy.justPressed(A_BUTTON)) {
-    //gamestate = GAME_TITLE;
-  }
+  arduboy.setCursor(20, 30);
+  arduboy.setTextSize(2);
+  arduboy.print("Score " + (String)hitCount);
+//  if (arduboy.justPressed(A_BUTTON)) {
+//    //gamestate = GAME_PLAY;
+//    arduboy.setTextSize(1);
+//    gamestat = 1;
+//    changeGameState(GameMenu::TitleScreen);
+//  }
 }
 
 void draw_world() {
@@ -222,6 +232,9 @@ void player_control() {
       move_bullets(false);
       check_collision_enemy();
     }
+  }
+  if(arduboy.pressed(A_BUTTON)) {
+    changeGameState(GameMenu::HighScoreScreen);
   }
 }
 
@@ -304,7 +317,6 @@ void draw_bullets() {
 //random spawning enemy
 void spawn_enemy(int count) {
   for(int i = 0; i < count; i++) {
-    //Enemy spawn_enemy;
     
     int spawn_x = hero.x;
     int spawn_y = hero.y;
@@ -323,8 +335,6 @@ void spawn_enemy(int count) {
 }
 
 void enemy_chase() {
-
-  //if collide(hero, enemy) then restart the game
   
   for(unsigned int i = 0; i < enemies.get_size(); i++)
   {
