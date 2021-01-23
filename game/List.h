@@ -40,7 +40,7 @@ public:
     return true;
   }
   
-  bool _remove(const ItemType& item) {
+  bool _remove(ItemType& item) {
     for (IndexType i = 0; i < this->next; i++) {
       if (this->items[i] != item) {
         continue;

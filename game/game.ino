@@ -272,13 +272,17 @@ void move_bullets(bool shoot_left) {
 
 //check collision
 void check_collision_enemy() {
-  Enemy enemy;
-  Rect enemyRect { enemy.x, enemy.y, 16, 18 };
-  for(uint8_t bulletNum = 0; bulletNum < bullets; bulletNum++) {
-    if(arduboy.collide(bullet[bulletNum], enemyRect)) {
-      hitCount++;
-      bullet[bulletNum].x = _bullet.bulletOff;
-      //TODO:remove bullet
+  bool dead = false;
+  for(uint8_t i = 0; i < enemies.get_size(); i++) {
+    Rect enemyRect { enemies[i].x, enemies[i].y, 16, 18 };
+    for(uint8_t bulletNum = 0; bulletNum < bullets; bulletNum++) {
+      if(arduboy.collide(bullet[bulletNum], enemyRect)) {
+        hitCount++;
+        bullet[bulletNum].x = _bullet.bulletOff;
+        //TODO:remove enemy
+        enemies.removeAt(i);
+        dead = true;
+      }
     }
   }
 }
@@ -334,7 +338,7 @@ void enemy_chase() {
     enemy.y = enemies[i].y;
     enemy.enemy_speed = 4;
     
-    Rect enemyRect { enemy.x, enemy.y, 16, 18 };
+    Rect enemyRect { enemies[i].x, enemies[i].y, 16, 18 };
     if(enemy.move_itter >= enemy.enemy_speed) {
       enemy.move_itter = 0;
       if(enemy.x < hero.x) {
