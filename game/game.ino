@@ -45,7 +45,7 @@ Bullet _bullet;
 Enemy enem;
 Rect bullet[bullets];
 
-void _update()
+void menuUpdate()
 {
   switch(gameState)
   {
@@ -67,10 +67,13 @@ void _update()
   }
 }
 
-void draw()
+void menuDraw()
 {
   switch(gameState)
   {
+    case GameMenu::TitleScreen:
+      titlescreen();
+      break;
     case GameMenu::Menu:
       drawMenu();
       break;
@@ -160,7 +163,9 @@ void highscorescreen() {
   arduboy.setCursor(20, 30);
   arduboy.setTextSize(2);
   arduboy.print("Score " + (String)hitCount);
-  if (arduboy.pressed(B_BUTTON)) {
+  if (arduboy.pressed(A_BUTTON)) {
+    arduboy.clear();
+    hitCount = 0;
     changeGameState(GameMenu::TitleScreen);
   }
 }
@@ -424,11 +429,11 @@ void loop() {
   }
 
   arduboy.pollButtons();
+  menuUpdate();
   arduboy.clear();
   if (arduboy.everyXFrames(20)) frame++;
   if (frame > 1) frame = 0;
-  _update();
-  draw();
+  menuDraw();
   arduboy.display();
   
 }
