@@ -27,9 +27,6 @@ int mapy = 0;
 
 Player hero;
 
-// //manu bypressing buttons
-int gamestat = 0;
-
 int frame = 0;
 
 uint8_t queue = 0;
@@ -94,9 +91,7 @@ void titlescreen() {
   arduboy.setTextSize(2);
   arduboy.print(F("HUNT!\n"));
   if (arduboy.justPressed(A_BUTTON)) {
-    //gamestate = GAME_PLAY;
     arduboy.setTextSize(1);
-    gamestat = 1;
     changeGameState(GameMenu::Menu);
   }
 }
@@ -144,7 +139,7 @@ void drawMenu()
 
   // Draw menu
   arduboy.setCursor(menuPositionX, menuPositionY + (menuPadding * 0));
-  arduboy.print(F("ONE PLAYER"));
+  arduboy.print(F("PLAY"));
   
   arduboy.setCursor(menuPositionX, menuPositionY + (menuPadding * 1));
   arduboy.print(F("OPTIONS"));
@@ -158,7 +153,6 @@ void gameoverscreen() {
   arduboy.setCursor(0, 0);
   arduboy.print("Game Over Screen\n");
   if (arduboy.justPressed(A_BUTTON)) {
-    //gamestate = GAME_HIGH;
   }
 }
 
@@ -166,12 +160,9 @@ void highscorescreen() {
   arduboy.setCursor(20, 30);
   arduboy.setTextSize(2);
   arduboy.print("Score " + (String)hitCount);
-//  if (arduboy.justPressed(A_BUTTON)) {
-//    //gamestate = GAME_PLAY;
-//    arduboy.setTextSize(1);
-//    gamestat = 1;
-//    changeGameState(GameMenu::TitleScreen);
-//  }
+  if (arduboy.pressed(B_BUTTON)) {
+    changeGameState(GameMenu::TitleScreen);
+  }
 }
 
 void draw_world() {
@@ -275,7 +266,7 @@ void move_bullets(bool shoot_left) {
       bullet[bulletNum].x++; // move bullet right
     }
     if (bullet[bulletNum].x != _bullet.bulletOff && shoot_left == true) {
-      bullet[bulletNum].x--;
+      bullet[bulletNum].x--; // move bullet left
     }
     if (bullet[bulletNum].x >= arduboy.width()) { // If off screen
       bullet[bulletNum].x = _bullet.bulletOff;  // Set bullet as unused
@@ -360,6 +351,10 @@ void enemy_chase() {
         enem.y--;
       }
     }
+
+    if(arduboy.collide(playerRect, enemyRect)) {
+      changeGameState(GameMenu::HighScoreScreen);
+    }
     
     enemies[i] = enem;
     Sprites::drawOverwrite(enemies[i].x, enemies[i].y, enemy_down, frame);
@@ -402,10 +397,6 @@ void gameplay() {
   check_enemy_queue();
 
   display_hits();
-
-  if (arduboy.justPressed(A_BUTTON)) {
-    //gamestate = GAME_OVER;
-  }
 }
 
 void setup() {
