@@ -166,6 +166,7 @@ void highscorescreen() {
   if (arduboy.pressed(A_BUTTON)) {
     arduboy.clear();
     hitCount = 0;
+    hero.health = 100;
     changeGameState(GameMenu::TitleScreen);
   }
 }
@@ -186,9 +187,9 @@ void draw_world() {
 
   arduboy.fillRect(0, 0, 48, 8, BLACK);
   arduboy.setCursor(0, 0);
-  arduboy.print(mapx);
-  arduboy.print(",");
-  arduboy.print(mapy);
+  arduboy.print(hero.health);
+  arduboy.print("/");
+  arduboy.print("100");
 }
 
 void player_control() {
@@ -218,7 +219,7 @@ void player_control() {
     Sprites::drawOverwrite(playerRect.x, playerRect.y, heroRight, frame);
   }
   if(arduboy.pressed(B_BUTTON)) {
-    if(mapx < 16) {
+    if(arduboy.pressed(LEFT_BUTTON)) {
       shoot(hero.x, hero.y);
       move_bullets(true);
       check_collision_enemy();
@@ -297,7 +298,7 @@ void check_collision_enemy() {
 //display hits
 void display_hits() {
   arduboy.setCursor(80, 0);
-  arduboy.print(F("HITS: "));
+  arduboy.print(F("KILLS: "));
   arduboy.print(hitCount);
 }
 
@@ -317,7 +318,7 @@ void spawn_enemy(int count) {
     int spawn_x = hero.x;
     int spawn_y = hero.y;
 
-    while((spawn_x > X_MIN) && (spawn_x < X_MAX) && (spawn_y > Y_MIN) && (spawn_y < Y_MAX)) {
+    while((spawn_x > X_MIN) && (spawn_x < X_MAX)) {
         spawn_x = random(X_MIN - 100, X_MAX + 100); // 50
         spawn_y = random(Y_MIN - 50, Y_MAX + 50); // 35
     } 
@@ -358,7 +359,11 @@ void enemy_chase() {
     }
 
     if(arduboy.collide(playerRect, enemyRect)) {
-      changeGameState(GameMenu::HighScoreScreen);
+      hero.health--;
+      if(hero.health <= 0) {
+        changeGameState(GameMenu::HighScoreScreen);
+      }
+      
     }
     
     enemies[i] = enem;

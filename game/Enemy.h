@@ -5,7 +5,6 @@ public:
   int y = 0;
   uint8_t move_itter = 0;
   uint8_t enemy_speed = 0;
-  bool dead = false;
 };
 
 //draw enemy

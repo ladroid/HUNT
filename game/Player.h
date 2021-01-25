@@ -1,9 +1,10 @@
 class Player
 {
 public:
-  int x = WIDTH / 2;
-  int y = HEIGHT / 2;
+  int x = 16; //WIDTH / 2
+  int y = 16; // HEIGHT / 2
   uint8_t wave = 1;
+  uint8_t health = 100;
 };
 
 //coordinates heroNormal
