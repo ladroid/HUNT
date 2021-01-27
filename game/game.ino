@@ -1,3 +1,5 @@
+#include <ArduboyTones.h>
+#include <ArduboyTonesPitches.h>
 #include <Arduboy2.h>
 #include "List.h"
 #include "Enemy.h"
@@ -5,8 +7,10 @@
 #include "LevelMap.h"
 #include "Menu.h"
 #include "Bullet.h"
+#include "Sound.h"
 
 Arduboy2 arduboy;
+ArduboyTones sound(arduboy.audio.enabled);
 
 #define SCREENWIDTH  128
 #define SCREENHEIGHT  64
@@ -219,6 +223,7 @@ void player_control() {
     Sprites::drawOverwrite(playerRect.x, playerRect.y, heroRight, frame);
   }
   if(arduboy.pressed(B_BUTTON)) {
+    sound.tone(NOTE_C4, 100);
     if(arduboy.pressed(LEFT_BUTTON)) {
       shoot(hero.x, hero.y);
       move_bullets(true);
@@ -289,6 +294,7 @@ void check_collision_enemy() {
         hitCount++;
         bullet[bulletNum].x = _bullet.bulletOff;
         //remove enemy
+        sound.tone(NOTE_E5, 100);
         enemies.removeAt(i);
       }
     }
@@ -361,6 +367,7 @@ void enemy_chase() {
     if(arduboy.collide(playerRect, enemyRect)) {
       hero.health--;
       if(hero.health <= 0) {
+        sound.tones(playerDead);
         changeGameState(GameMenu::HighScoreScreen);
       }
       
@@ -413,7 +420,7 @@ void setup() {
 
   arduboy.begin();
   arduboy.setFrameRate(60);
-
+  sound.tones(mainm);
   for (uint8_t bulletNum = 0; bulletNum < bullets; ++bulletNum) {
     bullet[bulletNum].x = _bullet.bulletOff;
     bullet[bulletNum].width = _bullet.bulletSize;
