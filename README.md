@@ -18,7 +18,7 @@ This is a simple game where the idea is to avoid enemies in a time.
     
     * Random spawning enemies
     
-    * Sound effects (soon will be)
+    * Sound effects 
     
     * Two types of map (soon will be)
 
