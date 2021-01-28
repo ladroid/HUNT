@@ -49,6 +49,16 @@ Bullet _bullet;
 Enemy enem;
 Rect bullet[bullets];
 
+void audio_on() {
+  isSound = true;
+  sound.tones(mainm);
+}
+
+void audio_off() {
+  isSound= false;
+  sound.noTone();
+}
+
 void menuUpdate()
 {
   switch(gameState)
@@ -63,7 +73,7 @@ void menuUpdate()
       //updateSinglePlayer();
       break;
     case GameMenu::Options:
-      //updateOptions();
+      updateOptions();
       break;
     case GameMenu::HighScoreScreen:
       highscorescreen();
@@ -85,7 +95,7 @@ void menuDraw()
       gameplay();
       break;
     case GameMenu::Options:
-      //drawOptions();
+      drawOptions();
       break;
     case GameMenu::HighScoreScreen:
       highscorescreen();
@@ -156,11 +166,60 @@ void drawMenu()
   arduboy.print('>');
 }
 
-void gameoverscreen() {
-  arduboy.setCursor(0, 0);
-  arduboy.print("Game Over Screen\n");
-  if (arduboy.justPressed(A_BUTTON)) {
+void updateOptions()
+{
+  if (arduboy.justPressed(DOWN_BUTTON))
+  {
+    if(cursorIndex < lastMenuItem)
+      ++cursorIndex;
+    else
+      cursorIndex = firstMenuItem;
   }
+
+  if (arduboy.justPressed(UP_BUTTON))
+  {
+    if(cursorIndex > firstMenuItem)
+      --cursorIndex;
+    else
+      cursorIndex = lastMenuItem;
+  }
+
+  if (arduboy.justPressed(B_BUTTON))
+  {
+    // Options to turn on / off audio
+    switch(cursorIndex) {
+      case 0:
+        audio_on();
+        break;
+      case 1:
+        audio_off();
+        break;
+    }
+  }
+  //go back to menu
+  if(arduboy.justPressed(A_BUTTON)) {
+    arduboy.clear();
+    changeGameState(GameMenu::TitleScreen);
+  }
+}
+
+void drawOptions() {
+  // Layout helper constants
+  constexpr uint8_t selectorPositionX = 2;
+  constexpr uint8_t menuPositionX = (selectorPositionX + 8);
+  constexpr uint8_t menuPositionY = 4;
+  constexpr uint8_t menuPadding = 8;
+
+  // Draw menu
+  arduboy.setCursor(menuPositionX, menuPositionY + (menuPadding * 0));
+  arduboy.print(F("Sound On"));
+  
+  arduboy.setCursor(menuPositionX, menuPositionY + (menuPadding * 1));
+  arduboy.print(F("Sound Off"));
+
+  // Draw cursor
+  arduboy.setCursor(selectorPositionX, menuPositionY + (menuPadding * cursorIndex));
+  arduboy.print('>');
 }
 
 void highscorescreen() {
@@ -223,7 +282,9 @@ void player_control() {
     Sprites::drawOverwrite(playerRect.x, playerRect.y, heroRight, frame);
   }
   if(arduboy.pressed(B_BUTTON)) {
-    sound.tone(NOTE_C4, 100);
+    if(isSound == true) {
+      sound.tone(NOTE_C4, 100);
+    }
     if(arduboy.pressed(LEFT_BUTTON)) {
       shoot(hero.x, hero.y);
       move_bullets(true);
@@ -294,7 +355,9 @@ void check_collision_enemy() {
         hitCount++;
         bullet[bulletNum].x = _bullet.bulletOff;
         //remove enemy
-        sound.tone(NOTE_E5, 100);
+        if(isSound == true) {
+          sound.tone(NOTE_E5, 100);
+        }
         enemies.removeAt(i);
       }
     }
@@ -367,7 +430,9 @@ void enemy_chase() {
     if(arduboy.collide(playerRect, enemyRect)) {
       hero.health--;
       if(hero.health <= 0) {
-        sound.tones(playerDead);
+        if(isSound == true) {
+          sound.tones(playerDead);
+        }
         changeGameState(GameMenu::HighScoreScreen);
       }
       

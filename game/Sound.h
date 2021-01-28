@@ -28,3 +28,5 @@ const uint16_t enemyDead[] PROGMEM = {
   NOTE_D5,133, NOTE_C5,133, NOTE_C5,533,
   TONES_END
 };
+
+bool isSound = false;
