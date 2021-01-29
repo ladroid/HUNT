@@ -309,7 +309,7 @@ void shoot(int x, int y) {
       // Set the start position. (A positive X indicates bullet in use)
       bullet[bulletNum].x = x;
       bullet[bulletNum].y = y + 3; // Part way down the player
-      waitCount = 6; // Start the delay counter for the next bullet
+      waitCount = 1; // Start the delay counter for the next bullet
     }
   }
   draw_bullets();
@@ -366,7 +366,7 @@ void check_collision_enemy() {
 
 //display hits
 void display_hits() {
-  arduboy.setCursor(80, 0);
+  arduboy.setCursor(65, 0);
   arduboy.print(F("KILLS: "));
   arduboy.print(hitCount);
 }
