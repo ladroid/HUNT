@@ -1,52 +1,13 @@
 #include <ArduboyTones.h>
 #include <ArduboyTonesPitches.h>
 #include <Arduboy2.h>
-#include "List.h"
-#include "Enemy.h"
-#include "Player.h"
-#include "LevelMap.h"
-#include "Menu.h"
-#include "Bullet.h"
-#include "Sound.h"
+#include "Global.h"
 
 Arduboy2 arduboy;
 ArduboyTones sound(arduboy.audio.enabled);
 
-#define SCREENWIDTH  128
-#define SCREENHEIGHT  64
-
-#define TILE_SIZE 16
-
-#define circle_width 2 
-#define X_MAX (WIDTH - circle_width - 1)
-#define X_MIN circle_width
-#define Y_MAX (HEIGHT - circle_width - 1)
-#define STATUS_BAR 9
-#define Y_MIN (circle_width + 1 + STATUS_BAR)
-
-#define SPAWN_LIMIT 2
-
-int mapx = 0;
-int mapy = 0;
-
-Player hero;
-
-int frame = 0;
-
-uint8_t queue = 0;
-
-uint8_t waitCount = 0;
-
-uint16_t hitCount = 0;
-
 Rect playerRect { hero.x, hero.y, 16, 16 };
 
-List<Enemy, SPAWN_LIMIT> enemies;
-
-constexpr uint8_t bullets = 5;    // Maximum number of bullets
-Bullet _bullet;
-
-Enemy enem;
 Rect bullet[bullets];
 
 void audio_on() {
@@ -138,6 +99,8 @@ void updateMenu()
     {
       case 0:
         changeGameState(GameMenu::SinglePlayer);
+        hero.x = WIDTH / 2;
+        hero.y = HEIGHT / 2;
         break;
       case 1:
         changeGameState(GameMenu::Options);
@@ -228,9 +191,8 @@ void highscorescreen() {
   arduboy.print("Score " + (String)hitCount);
   if (arduboy.pressed(A_BUTTON)) {
     arduboy.clear();
-    hitCount = 0;
-    hero.health = 100;
     changeGameState(GameMenu::TitleScreen);
+    restart_game();
   }
 }
 
@@ -258,26 +220,26 @@ void draw_world() {
 void player_control() {
   Sprites::drawOverwrite(playerRect.x, playerRect.y, heroDown, 0);
   if (arduboy.pressed(UP_BUTTON)) {
-    if (mapy < 16) {
-      mapy += 1;
+    if (mapy < (HEIGHT/2)) {
+      mapy++;
     }
     Sprites::drawOverwrite(playerRect.x, playerRect.y, heroUp, frame);
   }
   if (arduboy.pressed(DOWN_BUTTON)) {
     if (16 + 32 < mapy + TILE_SIZE * WORLD_HEIGHT) {
-      mapy -= 1;
+      mapy--;
     }
     Sprites::drawOverwrite(playerRect.x, playerRect.y, heroDown, frame);
   }
   if (arduboy.pressed(LEFT_BUTTON)) {
-    if (mapx < 16) {
-      mapx += 1;
+    if (mapx < (WIDTH / 2)) {
+      mapx++;
     }
     Sprites::drawOverwrite(playerRect.x, playerRect.y, heroLeft, frame);
   }
   if (arduboy.pressed(RIGHT_BUTTON)) {
-    if (16 + 32 < mapx + TILE_SIZE * WORLD_WIDTH) {
-      mapx -= 1;
+    if ((WIDTH/2) + 26 < mapx + TILE_SIZE * WORLD_WIDTH) {
+      mapx--;
     }
     Sprites::drawOverwrite(playerRect.x, playerRect.y, heroRight, frame);
   }
@@ -342,6 +304,20 @@ void move_bullets(bool shoot_left) {
     }
     if (bullet[bulletNum].x >= arduboy.width()) { // If off screen
       bullet[bulletNum].x = _bullet.bulletOff;  // Set bullet as unused
+    }
+  }
+}
+
+void move_bullets_y() {
+  for (uint8_t bulletNum = 0; bulletNum < bullets; bulletNum++) {
+    if (bullet[bulletNum].y != _bullet.bulletOff) { // If bullet in use
+      bullet[bulletNum].y++; // move bullet right
+    }
+    if (bullet[bulletNum].y != _bullet.bulletOff) {
+      bullet[bulletNum].y--; // move bullet left
+    }
+    if (bullet[bulletNum].y >= arduboy.width()) { // If off screen
+      bullet[bulletNum].y = _bullet.bulletOff;  // Set bullet as unused
     }
   }
 }
@@ -465,6 +441,16 @@ void check_enemy_queue() {
       }
     }
   }
+}
+
+void restart_game() {
+  enemies.clear_list();
+  hitCount = 0;
+  hero.health = 100;
+  hero.x = WIDTH / 2;
+  hero.y = HEIGHT / 2;
+  hero.wave = 1;
+  generate_wave();
 }
 
 void gameplay() {

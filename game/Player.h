@@ -1,8 +1,8 @@
 class Player
 {
 public:
-  int x = 16; //WIDTH / 2
-  int y = 16; // HEIGHT / 2
+  int x = WIDTH / 2;
+  int y = HEIGHT / 2;
   uint8_t wave = 1;
   uint8_t health = 100;
 };
@@ -11,6 +11,8 @@ public:
 //int heroX = 16;
 //int heroY = 16;
 
+int16_t mapx = 0;
+int16_t mapy = 0;
 
 const unsigned char heroDown[] PROGMEM = {
   16, 16,
