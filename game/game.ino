@@ -200,8 +200,8 @@ void draw_world() {
   const int tileswide = WIDTH / TILE_SIZE + 1;
   const int tilestall = HEIGHT / TILE_SIZE + 1;
 
-  for (int y = 0; y < tilestall; y++) {
-    for (int x = 0; x < tileswide; x++) {
+  for (size_t y = 0; y < tilestall; y++) {
+    for (size_t x = 0; x < tileswide; x++) {
       const int tilex = x - mapx / TILE_SIZE;
       const int tiley = y - mapy / TILE_SIZE;
       if (tilex >= 0 && tiley >= 0 && tilex < WORLD_WIDTH && tiley < WORLD_HEIGHT) {
@@ -264,7 +264,7 @@ void player_control() {
 }
 
 //shoot
-void shoot(int x, int y) {
+void shoot(int& x, int& y) {
   if (waitCount == 0) {
     uint8_t bulletNum = find_unused_bullet();
     if (bulletNum != bullets) { // If we get an unused bullet
@@ -357,7 +357,7 @@ void draw_bullets() {
 }
 
 //random spawning enemy
-void spawn_enemy(int count) {
+void spawn_enemy(int8_t& count) {
   for(int i = 0; i < count; i++) {
     
     int spawn_x = hero.x;
@@ -422,7 +422,7 @@ void enemy_chase() {
 void generate_wave() {
   for(unsigned int i = 0; i < hero.wave; i++) {
     if(enemies.get_size() < SPAWN_LIMIT) {
-      spawn_enemy(1);
+      spawn_enemy(number_enemies);
     } else {
       queue++;
     }
@@ -434,7 +434,7 @@ void generate_wave() {
 void check_enemy_queue() {
   if((enemies.get_size() < SPAWN_LIMIT) &&(queue > 0)) {
     for(int i = 0; i < queue; i++) {
-      spawn_enemy(1);
+      spawn_enemy(number_enemies);
       queue--;
       if(enemies.get_size() >= SPAWN_LIMIT) {
         break;

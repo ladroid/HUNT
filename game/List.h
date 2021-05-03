@@ -49,7 +49,7 @@ public:
       return false;
     
     --next; // decrement next index
-    for(int i = index; i < next; ++i) // shuffle everything down
+    for(size_t i = index; i < next; ++i) // shuffle everything down
       array[i] = array[i + 1];
     return true;
   }

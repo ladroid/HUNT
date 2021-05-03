@@ -1,8 +1,8 @@
 class Enemy
 {
 public:
-  int x = 0;
-  int y = 0;
+  int16_t x = 0;
+  int16_t y = 0;
   uint8_t move_itter = 0;
   uint8_t enemy_speed = 0;
 };

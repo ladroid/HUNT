@@ -1,8 +1,8 @@
 class Player
 {
 public:
-  int x = WIDTH / 2;
-  int y = HEIGHT / 2;
+  int16_t x = WIDTH / 2;
+  int16_t y = HEIGHT / 2;
   uint8_t wave = 1;
   uint8_t health = 100;
 };
