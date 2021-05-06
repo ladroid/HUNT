@@ -31,3 +31,9 @@ This is a simple game where the idea is to avoid enemies in a time.
 **Important**
 
 This game is under development.
+
+## Legal
+
+Copyright (C) 2021 Volodymyr Kadzhaia.
+
+This code is [BSD-3-Clause Licensed](https://github.com/ladroid/The-hunt-has-begun/blob/master/LICENSE.md).
