@@ -200,8 +200,8 @@ void draw_world() {
   const int tileswide = WIDTH / TILE_SIZE + 1;
   const int tilestall = HEIGHT / TILE_SIZE + 1;
 
-  for (size_t y = 0; y < tilestall; y++) {
-    for (size_t x = 0; x < tileswide; x++) {
+  for (size_t y = 0; y < tilestall; ++y) {
+    for (size_t x = 0; x < tileswide; ++x) {
       const int tilex = x - mapx / TILE_SIZE;
       const int tiley = y - mapy / TILE_SIZE;
       if (tilex >= 0 && tiley >= 0 && tilex < WORLD_WIDTH && tiley < WORLD_HEIGHT) {
@@ -282,10 +282,10 @@ void shoot(int& x, int& y) {
   }
 }
 
-//drawing bullet
+//return the index of the first unused bullet or return the value of bullets if all are in use
 uint8_t find_unused_bullet() {
   uint8_t bulletNum;
-  for (bulletNum = 0; bulletNum < bullets; bulletNum++) {
+  for (bulletNum = 0; bulletNum < bullets; ++bulletNum) {
     if (bullet[bulletNum].x == _bullet.bulletOff) {
       break; // unused bullet found
     }
@@ -295,7 +295,7 @@ uint8_t find_unused_bullet() {
 
 // Move all the bullets and disable any that go off screen
 void move_bullets(bool shoot_left) {
-  for (uint8_t bulletNum = 0; bulletNum < bullets; bulletNum++) {
+  for (uint8_t bulletNum = 0; bulletNum < bullets; ++bulletNum) {
     if (bullet[bulletNum].x != _bullet.bulletOff && shoot_left == false) { // If bullet in use
       bullet[bulletNum].x++; // move bullet right
     }
@@ -308,23 +308,9 @@ void move_bullets(bool shoot_left) {
   }
 }
 
-void move_bullets_y() {
-  for (uint8_t bulletNum = 0; bulletNum < bullets; bulletNum++) {
-    if (bullet[bulletNum].y != _bullet.bulletOff) { // If bullet in use
-      bullet[bulletNum].y++; // move bullet right
-    }
-    if (bullet[bulletNum].y != _bullet.bulletOff) {
-      bullet[bulletNum].y--; // move bullet left
-    }
-    if (bullet[bulletNum].y >= arduboy.width()) { // If off screen
-      bullet[bulletNum].y = _bullet.bulletOff;  // Set bullet as unused
-    }
-  }
-}
-
 //check collision
 void check_collision_enemy() {
-  for(uint8_t i = 0; i < enemies.get_size(); i++) {
+  for(uint8_t i = 0; i < enemies.get_size(); ++i) {
     Rect enemyRect { enemies[i].x, enemies[i].y, 16, 18 };
     for(uint8_t bulletNum = 0; bulletNum < bullets; bulletNum++) {
       if(arduboy.collide(bullet[bulletNum], enemyRect)) {
@@ -349,7 +335,7 @@ void display_hits() {
 
 // Draw all the active bullets
 void draw_bullets() {
-  for (uint8_t bulletNum = 0; bulletNum < bullets; bulletNum++) {
+  for (uint8_t bulletNum = 0; bulletNum < bullets; ++bulletNum) {
     if (bullet[bulletNum].x != _bullet.bulletOff) { // If bullet in use
       arduboy.fillRect(bullet[bulletNum].x, bullet[bulletNum].y, _bullet.bulletSize, _bullet.bulletSize, BLACK);
     }
@@ -358,7 +344,7 @@ void draw_bullets() {
 
 //random spawning enemy
 void spawn_enemy(int8_t& count) {
-  for(int i = 0; i < count; i++) {
+  for(int i = 0; i < count; ++i) {
     
     int spawn_x = hero.x;
     int spawn_y = hero.y;
@@ -378,7 +364,7 @@ void spawn_enemy(int8_t& count) {
 
 void enemy_chase() {
   
-  for(unsigned int i = 0; i < enemies.get_size(); i++)
+  for(unsigned int i = 0; i < enemies.get_size(); ++i)
   {
     //Enemy enemy;
     enem.move_itter = enemies[i].move_itter + 1;
@@ -420,7 +406,7 @@ void enemy_chase() {
 }
 
 void generate_wave() {
-  for(unsigned int i = 0; i < hero.wave; i++) {
+  for(unsigned int i = 0; i < hero.wave; ++i) {
     if(enemies.get_size() < SPAWN_LIMIT) {
       spawn_enemy(number_enemies);
     } else {
@@ -433,7 +419,7 @@ void generate_wave() {
 //check limit of enemies (which spawned)
 void check_enemy_queue() {
   if((enemies.get_size() < SPAWN_LIMIT) &&(queue > 0)) {
-    for(int i = 0; i < queue; i++) {
+    for(int i = 0; i < queue; ++i) {
       spawn_enemy(number_enemies);
       queue--;
       if(enemies.get_size() >= SPAWN_LIMIT) {
