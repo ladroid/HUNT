@@ -1,89 +1,84 @@
 #pragma once
 
-#ifndef LIST_H
-#define LIST_H
-
 #include <stddef.h>
 #include <stdint.h>
 
-template<typename T, uint8_t N>
+template<typename T, size_t size>
 class List
 {
 private:
-  T array[N];
   uint8_t next;
-
-public: 
-  using uint_type = uint8_t;
-  using value_type = T;
-  using reference = T&;
-  using const_reference = const T&;
+  T arr[size];
+public:
+  using ItemType = T;
+  using IndexType = uint8_t;
+  static constexpr size_t _size = size;
+  static constexpr IndexType firstIndex = 0;
+  static constexpr IndexType lastIndex = _size - 1;
+  List() : arr {  }, next {0}
+  {  }
 
   // Returns the number of Ts currently in the list
-  uint_type get_size(void) const 
-  { 
-    return next; 
+  IndexType get_size() const
+  {
+    return static_cast<IndexType>(_size);
   }
-  
-  // Returns the maximum number of Ts the list can hold
-  uint_type getCapacity(void) const 
-  { 
-    return N; 
-  }
-  
+
   // Returns true if the list is full
-  bool isFull(void) const 
-  { 
-    return get_size() == getCapacity(); 
+  bool isFull(void) const
+  {
+    return next == get_size();
   }
-  
+
   // Returns true if the list is empty
-  bool isEmpty(void) const 
-  { 
-    return get_size() == 0; 
+  bool isEmpty(void) const
+  {
+    return next == firstIndex;
   }
-  
+
   // Clears the list (by cheating)
-  void clear_list(void) 
-  { 
-    next = 0; 
+  void clear_list(void)
+  {
+    next = 0;
   }
-  
+
   // Returns true if the T was added
   // Returns false if the list is already full
-  bool add(const_reference item)
+  bool add(const T& item)
   {
-    if(this->isFull())
+    if (isFull())
+    {
       return false;
-    
-    array[next] = item; // put the T in the array
+    }
+    arr[next] = item; // put the T in the array
     ++next; // increment the next index
     return true;
   }
   
   // Returns true if the T was removed
   // Returns false if the index was invalid
-  bool removeAt(uint_type index)
+  bool removeAt(uint8_t index)
   {
-    if(index >= next)
+    if (index >= next)
+    {
       return false;
-    
+    }
     --next; // decrement next index
-    for(size_t i = index; i < next; ++i) // shuffle everything down
-      array[i] = array[i + 1];
-    return true;
+    for (IndexType i = index; i < next; ++i) // shuffle everything down
+    {
+      arr[i] = arr[i + 1];
+      return true;
+    }
   }
-  
+
   // These are for indexing the list
   // Be careful, these don't check if the index is valid
-  reference operator[](uint_type index) 
-  { 
-    return array[index]; 
-  }  
-  const_reference operator[](uint_type index) const 
-  { 
-    return array[index]; 
+  ItemType& operator[](uint8_t index)
+  {
+    return arr[index];
+  }
+  const ItemType& operator[](IndexType index) const
+  {
+    return arr[index];
   }
 };
-
-#endif
