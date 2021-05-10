@@ -11,12 +11,16 @@ private:
   T arr[size];
 public:
   using ItemType = T;
+  using ItemTypeRef = T&;
+  using ConstItemTypeRef = const T&;
   using IndexType = uint8_t;
   static constexpr size_t _size = size;
   static constexpr IndexType firstIndex = 0;
   static constexpr IndexType lastIndex = _size - 1;
-  List() : arr {  }, next {0}
-  {  }
+  List() : arr {}
+  {
+    next = 0;
+  }
 
   // Returns the number of Ts currently in the list
   IndexType get_size() const
@@ -44,7 +48,7 @@ public:
 
   // Returns true if the T was added
   // Returns false if the list is already full
-  bool add(const T& item)
+  bool add(ConstItemTypeRef item)
   {
     if (isFull())
     {
@@ -57,7 +61,7 @@ public:
   
   // Returns true if the T was removed
   // Returns false if the index was invalid
-  bool removeAt(uint8_t index)
+  bool removeAt(IndexType index)
   {
     if (index >= next)
     {
@@ -73,11 +77,11 @@ public:
 
   // These are for indexing the list
   // Be careful, these don't check if the index is valid
-  ItemType& operator[](uint8_t index)
+  ItemTypeRef operator[](uint8_t index)
   {
     return arr[index];
   }
-  const ItemType& operator[](IndexType index) const
+  ConstItemTypeRef operator[](IndexType index) const
   {
     return arr[index];
   }
