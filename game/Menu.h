@@ -8,7 +8,7 @@ enum class GameMenu: uint8_t
 };
 
 GameMenu gameState = GameMenu::TitleScreen;
-void changeGameState(GameMenu newGameState)
+inline void changeGameState(GameMenu newGameState)
 {
   gameState = newGameState;
 }

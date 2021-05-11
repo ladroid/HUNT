@@ -8,7 +8,7 @@ class List
 {
 private:
   uint8_t next;
-  T arr[size];
+  T* arr;
 public:
   using ItemType = T;
   using ItemTypeRef = T&;
@@ -17,27 +17,34 @@ public:
   static constexpr size_t _size = size;
   static constexpr IndexType firstIndex = 0;
   static constexpr IndexType lastIndex = _size - 1;
-  List() : arr {}
+
+  List() : next{0}
   {
-    next = 0;
+    arr = new ItemType[_size]{};
+  }
+  
+  // Returns the number of Ts currently in the list
+  uint8_t get_size(void) const
+  {
+    return next;
   }
 
-  // Returns the number of Ts currently in the list
-  IndexType get_size() const
-  {
-    return static_cast<IndexType>(_size);
+  // Returns the maximum number of Ts the list can hold
+  uint8_t getCapacity(void) const 
+  { 
+    return _size; 
   }
 
   // Returns true if the list is full
-  bool isFull(void) const
+  bool isFull()
   {
-    return next == get_size();
+    return (getCapacity() == get_size());
   }
 
   // Returns true if the list is empty
-  bool isEmpty(void) const
+  bool isEmpty()
   {
-    return next == firstIndex;
+    return (getCapacity() == firstIndex);
   }
 
   // Clears the list (by cheating)
@@ -58,6 +65,26 @@ public:
     ++next; // increment the next index
     return true;
   }
+
+  bool _remove(const ItemType& item)
+  {
+    for(IndexType i = 0; i < next; ++i)
+    {
+      if(arr[i] != item)
+      {
+        continue;
+      }
+      next--;
+      while(i < next)
+      {
+        arr[i] = arr[++i];
+        ++i;
+      }
+      arr[next].~ItemType();
+      return true;
+    }
+    return false;
+  }
   
   // Returns true if the T was removed
   // Returns false if the index was invalid
@@ -77,12 +104,18 @@ public:
 
   // These are for indexing the list
   // Be careful, these don't check if the index is valid
-  ItemTypeRef operator[](uint8_t index)
+  ItemTypeRef operator[](IndexType index)
   {
     return arr[index];
   }
   ConstItemTypeRef operator[](IndexType index) const
   {
     return arr[index];
+  }
+
+  ~List()
+  {
+    next = 0;
+    delete[] arr;
   }
 };

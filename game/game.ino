@@ -10,12 +10,12 @@ Rect playerRect { hero.x, hero.y, 16, 16 };
 
 Rect bullet[bullets];
 
-void audio_on() {
+inline void audio_on() {
   isSound = true;
   sound.tones(mainm);
 }
 
-void audio_off() {
+inline void audio_off() {
   isSound= false;
   sound.noTone();
 }
@@ -221,25 +221,25 @@ void player_control() {
   Sprites::drawOverwrite(playerRect.x, playerRect.y, heroDown, 0);
   if (arduboy.pressed(UP_BUTTON)) {
     if (mapy < (HEIGHT/2)) {
-      mapy++;
+      ++mapy;
     }
     Sprites::drawOverwrite(playerRect.x, playerRect.y, heroUp, frame);
   }
   if (arduboy.pressed(DOWN_BUTTON)) {
     if (16 + 32 < mapy + TILE_SIZE * WORLD_HEIGHT) {
-      mapy--;
+      --mapy;
     }
     Sprites::drawOverwrite(playerRect.x, playerRect.y, heroDown, frame);
   }
   if (arduboy.pressed(LEFT_BUTTON)) {
     if (mapx < (WIDTH / 2)) {
-      mapx++;
+      ++mapx;
     }
     Sprites::drawOverwrite(playerRect.x, playerRect.y, heroLeft, frame);
   }
   if (arduboy.pressed(RIGHT_BUTTON)) {
     if ((WIDTH/2) + 26 < mapx + TILE_SIZE * WORLD_WIDTH) {
-      mapx--;
+      --mapx;
     }
     Sprites::drawOverwrite(playerRect.x, playerRect.y, heroRight, frame);
   }
@@ -278,7 +278,7 @@ void shoot(int& x, int& y) {
 
   // Decrement the bullet wait count if active
   if (waitCount != 0) {
-    waitCount--;
+    --waitCount;
   }
 }
 
@@ -297,10 +297,10 @@ uint8_t find_unused_bullet() {
 void move_bullets(bool shoot_left) {
   for (uint8_t bulletNum = 0; bulletNum < bullets; ++bulletNum) {
     if (bullet[bulletNum].x != _bullet.bulletOff && shoot_left == false) { // If bullet in use
-      bullet[bulletNum].x++; // move bullet right
+      ++bullet[bulletNum].x; // move bullet right
     }
     if (bullet[bulletNum].x != _bullet.bulletOff && shoot_left == true) {
-      bullet[bulletNum].x--; // move bullet left
+      --bullet[bulletNum].x; // move bullet left
     }
     if (bullet[bulletNum].x >= arduboy.width()) { // If off screen
       bullet[bulletNum].x = _bullet.bulletOff;  // Set bullet as unused
@@ -312,9 +312,9 @@ void move_bullets(bool shoot_left) {
 void check_collision_enemy() {
   for(uint8_t i = 0; i < enemies.get_size(); ++i) {
     Rect enemyRect { enemies[i].x, enemies[i].y, 16, 18 };
-    for(uint8_t bulletNum = 0; bulletNum < bullets; bulletNum++) {
+    for(uint8_t bulletNum = 0; bulletNum < bullets; ++bulletNum) {
       if(arduboy.collide(bullet[bulletNum], enemyRect)) {
-        hitCount++;
+        ++hitCount;
         bullet[bulletNum].x = _bullet.bulletOff;
         //remove enemy
         if(isSound == true) {
@@ -343,11 +343,11 @@ void draw_bullets() {
 }
 
 //random spawning enemy
-void spawn_enemy(int8_t& count) {
+void spawn_enemy(const int8_t& count) {
   for(int i = 0; i < count; ++i) {
     
-    int spawn_x = hero.x;
-    int spawn_y = hero.y;
+    int spawn_x = 20;
+    int spawn_y = 20;
 
     while((spawn_x > X_MIN) && (spawn_x < X_MAX)) {
         spawn_x = random(X_MIN - 100, X_MAX + 100); // 50
@@ -376,21 +376,21 @@ void enemy_chase() {
     if(enem.move_itter >= enem.enemy_speed) {
       enem.move_itter = 0;
       if(enem.x < hero.x) {
-        enem.x++; 
+        ++enem.x; 
       }
       if(enem.x > hero.x) {
-        enem.x--;
+        --enem.x;
       }
       if(enem.y < hero.y) {
-        enem.y++;
+        ++enem.y;
       }
       if(enem.y > hero.y) {
-        enem.y--;
+        --enem.y;
       }
     }
 
     if(arduboy.collide(playerRect, enemyRect)) {
-      hero.health--;
+      --hero.health;
       if(hero.health <= 0) {
         if(isSound == true) {
           sound.tones(playerDead);
@@ -410,10 +410,10 @@ void generate_wave() {
     if(enemies.get_size() < SPAWN_LIMIT) {
       spawn_enemy(number_enemies);
     } else {
-      queue++;
+      ++queue;
     }
   }
-  hero.wave++;
+  ++hero.wave;
 }
 
 //check limit of enemies (which spawned)
@@ -421,7 +421,7 @@ void check_enemy_queue() {
   if((enemies.get_size() < SPAWN_LIMIT) &&(queue > 0)) {
     for(int i = 0; i < queue; ++i) {
       spawn_enemy(number_enemies);
-      queue--;
+      --queue;
       if(enemies.get_size() >= SPAWN_LIMIT) {
         break;
       }
@@ -480,7 +480,7 @@ void loop() {
   arduboy.pollButtons();
   menuUpdate();
   arduboy.clear();
-  if (arduboy.everyXFrames(20)) frame++;
+  if (arduboy.everyXFrames(20)) ++frame;
   if (frame > 1) frame = 0;
   menuDraw();
   arduboy.display();
