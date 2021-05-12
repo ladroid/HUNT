@@ -24,25 +24,25 @@ public:
   }
   
   // Returns the number of Ts currently in the list
-  uint8_t get_size(void) const
+  constexpr IndexType get_size(void) const
   {
     return next;
   }
 
   // Returns the maximum number of Ts the list can hold
-  uint8_t getCapacity(void) const 
+  constexpr IndexType getCapacity(void) const 
   { 
-    return _size; 
+    return static_cast<IndexType>(_size); 
   }
 
   // Returns true if the list is full
-  bool isFull()
+  constexpr bool isFull() const
   {
     return (getCapacity() == get_size());
   }
 
   // Returns true if the list is empty
-  bool isEmpty()
+  constexpr bool isEmpty() const
   {
     return (getCapacity() == firstIndex);
   }
@@ -50,6 +50,10 @@ public:
   // Clears the list (by cheating)
   void clear_list(void)
   {
+    for(IndexType i = 0; i < next; ++i)
+    {
+      arr[i].~ItemType();
+    }
     next = 0;
   }
 
@@ -66,7 +70,7 @@ public:
     return true;
   }
 
-  bool _remove(const ItemType& item)
+  bool _remove(ConstItemTypeRef item)
   {
     for(IndexType i = 0; i < next; ++i)
     {
