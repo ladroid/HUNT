@@ -8,7 +8,7 @@ ArduboyTones sound(arduboy.audio.enabled);
 
 Rect playerRect { hero.x, hero.y, 16, 16 };
 
-Rect bullet[bullets];
+BulletInfo bulletInfos[bullets];
 
 inline void audio_on() {
   isSound = true;
@@ -248,13 +248,14 @@ void player_control() {
       sound.tone(NOTE_C4, 100);
     }
     if(arduboy.pressed(LEFT_BUTTON)) {
-      shoot(hero.x, hero.y);
-      move_bullets(true);
+      bool shoot_left = arduboy.pressed(LEFT_BUTTON);
+      shoot(hero.x, hero.y, shoot_left);
+      move_bullets();
       check_collision_enemy();
     }
     else {
-      shoot(hero.x, hero.y);
-      move_bullets(false);
+      shoot(hero.x, hero.y, arduboy.pressed(LEFT_BUTTON));
+      move_bullets();
       check_collision_enemy();
     }
   }
@@ -264,29 +265,27 @@ void player_control() {
 }
 
 //shoot
-void shoot(int& x, int& y) {
-  if (waitCount == 0) {
-    uint8_t bulletNum = find_unused_bullet();
-    if (bulletNum != bullets) { // If we get an unused bullet
-      // Set the start position. (A positive X indicates bullet in use)
-      bullet[bulletNum].x = x;
-      bullet[bulletNum].y = y + 3; // Part way down the player
-      waitCount = 1; // Start the delay counter for the next bullet
+void shoot(int& x, int& y, bool shoot_left) {
+    if (waitCount == 0) {
+        uint8_t bulletNum = find_unused_bullet();
+        if (bulletNum != bullets) {
+            bulletInfos[bulletNum].rect.x = x;
+            bulletInfos[bulletNum].rect.y = y + 3;
+            bulletInfos[bulletNum].goingLeft = shoot_left;
+            waitCount = 1;
+        }
     }
-  }
-  draw_bullets();
-
-  // Decrement the bullet wait count if active
-  if (waitCount != 0) {
-    --waitCount;
-  }
+    draw_bullets();
+    if (waitCount != 0) {
+        --waitCount;
+    }
 }
 
 //return the index of the first unused bullet or return the value of bullets if all are in use
 uint8_t find_unused_bullet() {
   uint8_t bulletNum;
   for (bulletNum = 0; bulletNum < bullets; ++bulletNum) {
-    if (bullet[bulletNum].x == _bullet.bulletOff) {
+    if (bulletInfos[bulletNum].rect.x == _bullet.bulletOff) {
       break; // unused bullet found
     }
   }
@@ -294,18 +293,19 @@ uint8_t find_unused_bullet() {
 }
 
 // Move all the bullets and disable any that go off screen
-void move_bullets(bool shoot_left) {
-  for (uint8_t bulletNum = 0; bulletNum < bullets; ++bulletNum) {
-    if (bullet[bulletNum].x != _bullet.bulletOff && shoot_left == false) { // If bullet in use
-      ++bullet[bulletNum].x; // move bullet right
+void move_bullets() {
+    for (uint8_t bulletNum = 0; bulletNum < bullets; ++bulletNum) {
+        if (bulletInfos[bulletNum].rect.x != _bullet.bulletOff) {
+            if (bulletInfos[bulletNum].goingLeft) {
+                bulletInfos[bulletNum].rect.x -= _bullet.bulletSpeed;
+            } else {
+                bulletInfos[bulletNum].rect.x += _bullet.bulletSpeed;
+            }
+        }
+        if (bulletInfos[bulletNum].rect.x >= arduboy.width() || bulletInfos[bulletNum].rect.x < 0) {
+            bulletInfos[bulletNum].rect.x = _bullet.bulletOff;
+        }
     }
-    if (bullet[bulletNum].x != _bullet.bulletOff && shoot_left == true) {
-      --bullet[bulletNum].x; // move bullet left
-    }
-    if (bullet[bulletNum].x >= arduboy.width()) { // If off screen
-      bullet[bulletNum].x = _bullet.bulletOff;  // Set bullet as unused
-    }
-  }
 }
 
 //check collision
@@ -313,9 +313,9 @@ void check_collision_enemy() {
   for(uint8_t i = 0; i < enemies.get_size(); ++i) {
     Rect enemyRect { enemies[i].x, enemies[i].y, 16, 18 };
     for(uint8_t bulletNum = 0; bulletNum < bullets; ++bulletNum) {
-      if(arduboy.collide(bullet[bulletNum], enemyRect)) {
+      if(arduboy.collide(bulletInfos[bulletNum].rect, enemyRect)) {
         ++hitCount;
-        bullet[bulletNum].x = _bullet.bulletOff;
+        bulletInfos[bulletNum].rect.x = _bullet.bulletOff;
         //remove enemy
         if(isSound == true) {
           sound.tone(NOTE_E5, 100);
@@ -336,8 +336,8 @@ void display_hits() {
 // Draw all the active bullets
 void draw_bullets() {
   for (uint8_t bulletNum = 0; bulletNum < bullets; ++bulletNum) {
-    if (bullet[bulletNum].x != _bullet.bulletOff) { // If bullet in use
-      arduboy.fillRect(bullet[bulletNum].x, bullet[bulletNum].y, _bullet.bulletSize, _bullet.bulletSize, BLACK);
+    if (bulletInfos[bulletNum].rect.x != _bullet.bulletOff) { // If bullet in use
+      arduboy.fillRect(bulletInfos[bulletNum].rect.x, bulletInfos[bulletNum].rect.y, _bullet.bulletSize, _bullet.bulletSize, BLACK);
     }
   }
 }
@@ -459,9 +459,9 @@ void setup() {
   arduboy.setFrameRate(60);
   sound.tones(mainm);
   for (uint8_t bulletNum = 0; bulletNum < bullets; ++bulletNum) {
-    bullet[bulletNum].x = _bullet.bulletOff;
-    bullet[bulletNum].width = _bullet.bulletSize;
-    bullet[bulletNum].height = _bullet.bulletSize;
+    bulletInfos[bulletNum].rect.x = _bullet.bulletOff;
+    bulletInfos[bulletNum].rect.width = _bullet.bulletSize;
+    bulletInfos[bulletNum].rect.height = _bullet.bulletSize;
   }
   
   arduboy.display();
