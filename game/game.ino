@@ -356,7 +356,19 @@ void spawn_enemy(const int8_t& count) {
     enem.x = spawn_x;
     enem.y = spawn_y;
 
-    enem.enemy_speed = 4;
+    if(random(0, 2) == 0) { // 50% chance for either type
+        // Fast enemy
+        enem.type = EnemyType::Fast;
+        enem.health = 2; // Example health value, you can adjust
+        enem.enemy_speed = 8; // High speed
+    } else {
+        // Strong enemy
+        enem.type = EnemyType::Strong;
+        enem.health = 100; // Example health value, you can adjust
+        enem.enemy_speed = 2; // Low speed
+    }
+
+    // enem.enemy_speed = 4;
     //add enemies into list
     enemies.add(enem);
   }
@@ -370,7 +382,7 @@ void enemy_chase() {
     enem.move_itter = enemies[i].move_itter + 1;
     enem.x = enemies[i].x;
     enem.y = enemies[i].y;
-    enem.enemy_speed = 4;
+    // enem.enemy_speed = 4;
     
     Rect enemyRect { enemies[i].x, enemies[i].y, 16, 18 };
     if(enem.move_itter >= enem.enemy_speed) {
@@ -401,7 +413,15 @@ void enemy_chase() {
     }
     
     enemies[i] = enem;
-    Sprites::drawOverwrite(enemies[i].x, enemies[i].y, enemy_down, frame);
+    // Sprites::drawOverwrite(enemies[i].x, enemies[i].y, enemy_down, frame);
+    switch (enemies[i].type) {
+      case EnemyType::Fast:
+        Sprites::drawOverwrite(enemies[i].x, enemies[i].y, enemy_down, frame);
+        break;
+      case EnemyType::Strong:
+        Sprites::drawOverwrite(enemies[i].x, enemies[i].y, enemy_second, 0);
+        break;
+    }
   }
 }
 
