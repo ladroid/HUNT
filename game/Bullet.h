@@ -1,3 +1,10 @@
+enum BulletDirection {
+  LEFT,
+  RIGHT,
+  UP,
+  DOWN
+};
+
 class Bullet {
 public:
   uint8_t bulletSize = 3; // Size of a square bullet
@@ -9,5 +16,6 @@ public:
 
 struct BulletInfo {
     Rect rect;
-    bool goingLeft = false;
+    // bool goingLeft = false;
+    BulletDirection direction;
 };

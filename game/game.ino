@@ -266,19 +266,30 @@ void player_control() {
 
 //shoot
 void shoot(int& x, int& y, bool shoot_left) {
-    if (waitCount == 0) {
-        uint8_t bulletNum = find_unused_bullet();
-        if (bulletNum != bullets) {
-            bulletInfos[bulletNum].rect.x = x;
-            bulletInfos[bulletNum].rect.y = y + 3;
-            bulletInfos[bulletNum].goingLeft = shoot_left;
-            waitCount = 1;
-        }
+  BulletDirection direction;
+  if (arduboy.pressed(LEFT_BUTTON)) {
+    direction = LEFT;
+  } else if (arduboy.pressed(RIGHT_BUTTON)) {
+    direction = RIGHT;
+  } else if (arduboy.pressed(UP_BUTTON)) {
+    direction = UP;
+  } else if (arduboy.pressed(DOWN_BUTTON)) {
+    direction = DOWN;
+  }
+
+  if (waitCount == 0) {
+    uint8_t bulletNum = find_unused_bullet();
+    if (bulletNum != bullets) {
+      bulletInfos[bulletNum].rect.x = x;
+      bulletInfos[bulletNum].rect.y = y + 3;
+      bulletInfos[bulletNum].direction = direction;
+      waitCount = 1;
     }
-    draw_bullets();
-    if (waitCount != 0) {
-        --waitCount;
-    }
+  }
+  draw_bullets();
+  if (waitCount != 0) {
+    --waitCount;
+  }
 }
 
 //return the index of the first unused bullet or return the value of bullets if all are in use
@@ -294,18 +305,29 @@ uint8_t find_unused_bullet() {
 
 // Move all the bullets and disable any that go off screen
 void move_bullets() {
-    for (uint8_t bulletNum = 0; bulletNum < bullets; ++bulletNum) {
-        if (bulletInfos[bulletNum].rect.x != _bullet.bulletOff) {
-            if (bulletInfos[bulletNum].goingLeft) {
-                bulletInfos[bulletNum].rect.x -= _bullet.bulletSpeed;
-            } else {
-                bulletInfos[bulletNum].rect.x += _bullet.bulletSpeed;
-            }
-        }
-        if (bulletInfos[bulletNum].rect.x >= arduboy.width() || bulletInfos[bulletNum].rect.x < 0) {
-            bulletInfos[bulletNum].rect.x = _bullet.bulletOff;
-        }
+  for (uint8_t bulletNum = 0; bulletNum < bullets; ++bulletNum) {
+    if (bulletInfos[bulletNum].rect.x != _bullet.bulletOff) {
+      switch (bulletInfos[bulletNum].direction) {
+        case LEFT:
+          bulletInfos[bulletNum].rect.x -= _bullet.bulletSpeed;
+          break;
+        case RIGHT:
+          bulletInfos[bulletNum].rect.x += _bullet.bulletSpeed;
+          break;
+        case UP:
+          bulletInfos[bulletNum].rect.y -= _bullet.bulletSpeed;
+          break;
+        case DOWN:
+          bulletInfos[bulletNum].rect.y += _bullet.bulletSpeed;
+          break;
+      }
     }
+    
+    if (bulletInfos[bulletNum].rect.x >= arduboy.width() || bulletInfos[bulletNum].rect.x < 0 ||
+        bulletInfos[bulletNum].rect.y >= arduboy.height() || bulletInfos[bulletNum].rect.y < 0) {
+      bulletInfos[bulletNum].rect.x = _bullet.bulletOff;
+    }
+  }
 }
 
 //check collision
