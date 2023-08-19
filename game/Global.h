@@ -32,7 +32,7 @@ uint16_t hitCount = 0;
 
 List<Enemy, SPAWN_LIMIT> enemies;
 
-constexpr uint8_t bullets = 5;    // Maximum number of bullets
+constexpr uint8_t bullets = 1;    // Maximum number of bullets
 constexpr int8_t number_enemies = 1;
 Bullet _bullet;
 
