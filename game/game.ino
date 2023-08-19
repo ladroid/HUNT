@@ -247,25 +247,24 @@ void player_control() {
     if(isSound == true) {
       sound.tone(NOTE_C4, 100);
     }
-    if(arduboy.pressed(LEFT_BUTTON)) {
-      bool shoot_left = arduboy.pressed(LEFT_BUTTON);
-      shoot(hero.x, hero.y, shoot_left);
-      move_bullets();
-      check_collision_enemy();
-    }
-    else {
-      shoot(hero.x, hero.y, arduboy.pressed(LEFT_BUTTON));
-      move_bullets();
-      check_collision_enemy();
-    }
+    shoot(hero.x, hero.y);
   }
+  // Always move bullets, regardless of shooting
+  move_bullets();
+
   if(arduboy.pressed(A_BUTTON)) {
     changeGameState(GameMenu::HighScoreScreen);
   }
 }
 
+void update_bullets() {
+  move_bullets();
+  draw_bullets();
+  check_collision_enemy();
+}
+
 //shoot
-void shoot(int& x, int& y, bool shoot_left) {
+void shoot(int& x, int& y) {
   BulletDirection direction;
   if (arduboy.pressed(LEFT_BUTTON)) {
     direction = LEFT;
@@ -277,30 +276,18 @@ void shoot(int& x, int& y, bool shoot_left) {
     direction = DOWN;
   }
 
-  if (waitCount == 0) {
-    uint8_t bulletNum = find_unused_bullet();
-    if (bulletNum != bullets) {
-      bulletInfos[bulletNum].rect.x = x;
-      bulletInfos[bulletNum].rect.y = y + 3;
-      bulletInfos[bulletNum].direction = direction;
-      waitCount = 1;
-    }
-  }
-  draw_bullets();
-  if (waitCount != 0) {
-    --waitCount;
+  // Only proceed if there isn't an active bullet
+  if (bulletInfos[0].rect.x == _bullet.bulletOff) {  // Check if the bullet is off-screen
+    bulletInfos[0].rect.x = x;
+    bulletInfos[0].rect.y = y + 3;
+    bulletInfos[0].direction = direction;
+    draw_bullets();
   }
 }
 
 //return the index of the first unused bullet or return the value of bullets if all are in use
 uint8_t find_unused_bullet() {
-  uint8_t bulletNum;
-  for (bulletNum = 0; bulletNum < bullets; ++bulletNum) {
-    if (bulletInfos[bulletNum].rect.x == _bullet.bulletOff) {
-      break; // unused bullet found
-    }
-  }
-  return bulletNum;
+  return 0;
 }
 
 // Move all the bullets and disable any that go off screen
@@ -357,10 +344,8 @@ void display_hits() {
 
 // Draw all the active bullets
 void draw_bullets() {
-  for (uint8_t bulletNum = 0; bulletNum < bullets; ++bulletNum) {
-    if (bulletInfos[bulletNum].rect.x != _bullet.bulletOff) { // If bullet in use
-      arduboy.fillRect(bulletInfos[bulletNum].rect.x, bulletInfos[bulletNum].rect.y, _bullet.bulletSize, _bullet.bulletSize, BLACK);
-    }
+  if (bulletInfos[0].rect.x != _bullet.bulletOff) { // If bullet in use
+    arduboy.fillRect(bulletInfos[0].rect.x, bulletInfos[0].rect.y, _bullet.bulletSize, _bullet.bulletSize, BLACK);
   }
 }
 
@@ -525,6 +510,7 @@ void loop() {
   if (arduboy.everyXFrames(20)) ++frame;
   if (frame > 1) frame = 0;
   menuDraw();
+  update_bullets();
   arduboy.display();
   
 }
